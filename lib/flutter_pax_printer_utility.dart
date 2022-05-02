@@ -140,7 +140,16 @@ class FlutterPaxPrinterUtility {
         await _channel.invokeMethod('printQRCode', arguments);
     return response;
   }
-
+  static Future<bool?> printBarCode(String text, int width, int height) async {
+    Map<String, dynamic> arguments = {
+      "text": text,
+      "width": width,
+      "height": height,
+    };
+    final bool? response =
+    await _channel.invokeMethod('printBarCode', arguments);
+    return response;
+  }
   static Future<bool?> leftIndents(int indent) async {
     Map<String, dynamic> arguments = {
       "indent": indent,

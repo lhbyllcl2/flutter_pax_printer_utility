@@ -45,7 +45,32 @@ public class QRCodeUtil {
 
         return bitmap;
     }
+    public static Bitmap encodeAsBitmapForBar(String source, int width, int height) {
+        BitMatrix result;
 
+        try {
+            result = new MultiFormatWriter().encode(source, BarcodeFormat.CODE_128, width, height, null);
+        } catch (IllegalArgumentException | WriterException e) {
+            // Unsupported format
+            return null;
+        }
+
+        final int w = result.getWidth();
+        final int h = result.getHeight();
+        final int[] pixels = new int[w * h];
+
+        for (int y = 0; y < h; y++) {
+            final int offset = y * w;
+            for (int x = 0; x < w; x++) {
+                pixels[offset + x] = result.get(x, y) ? Color.BLACK : Color.WHITE;
+            }
+        }
+
+        final Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, width, 0, 0, w, h);
+
+        return bitmap;
+    }
     public static Bitmap getBitmapFromURL(String src) {
         try {
            URL url = new URL(src);

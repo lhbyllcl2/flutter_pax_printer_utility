@@ -203,7 +203,13 @@ public class FlutterPaxPrinterUtilityPlugin implements FlutterPlugin, MethodCall
       int height = call.argument("height");
       printerUtility.printBitmap(qrcodeUtility.encodeAsBitmap(qrString, width, height ));
       result.success(true);
-    } else if (call.method.equals("start")) {
+    } else if (call.method.equals("printBarCode")) {
+      String qrString = call.argument("text");
+      int width = call.argument("width");
+      int height = call.argument("height");
+      printerUtility.printBitmap(qrcodeUtility.encodeAsBitmapForBar(qrString, width, height ));
+      result.success(true);
+    }else if (call.method.equals("start")) {
       final String status = printerUtility.start();
       result.success(status);
     } else if (call.method.equals("leftIndents")) {
