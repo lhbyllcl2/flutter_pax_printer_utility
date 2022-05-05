@@ -37,15 +37,15 @@ public class PrinterUtility {
         return dal;
     }
 
-    public void init() {
+    public boolean init() {
         try {
             printer = getDal().getPrinter();
             printer.init();
-            Log.i("INIT",  "INIT");
+            return true;
             // Toast.makeText(this._context, "SUCCESS INIT PRINTER", Toast.LENGTH_LONG).show();
         } catch (PrinterDevException e) {
             e.printStackTrace();
-            Log.e("INIT",  String.valueOf(e));
+           return false;
         }
     }
 
