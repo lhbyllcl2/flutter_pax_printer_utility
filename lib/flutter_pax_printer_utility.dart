@@ -9,6 +9,11 @@ class FlutterPaxPrinterUtility {
   static const MethodChannel _channel =
       MethodChannel('flutter_pax_printer_utility');
 
+  static Future<int?> get isSupportPrinter async {
+    final int? version = await _channel.invokeMethod('isSupportPrinter');
+    return version;
+  }
+
   static Future<String?> get platformVersion async {
     final String? version = await _channel.invokeMethod('getPlatformVersion');
     return version;

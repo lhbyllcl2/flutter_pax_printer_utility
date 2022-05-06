@@ -19,6 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   String statusPrinter = '0';
+  String supportPrinter = '0';
 
   @override
   void initState() {
@@ -48,7 +49,14 @@ class _MyAppState extends State<MyApp> {
       _platformVersion = platformVersion;
     });
   }
-
+  isSupportPrinter() async {
+    var supportPrinter = await FlutterPaxPrinterUtility.isSupportPrinter;
+    print('supportPrinter:');
+    print(supportPrinter);
+    setState(() {
+      supportPrinter = supportPrinter;
+    });
+  }
   getPrinterStatus() async {
     String? status = await FlutterPaxPrinterUtility.getStatus;
     setState(() {
@@ -131,6 +139,13 @@ class _MyAppState extends State<MyApp> {
                 statusPrinter == '1'
                     ? const Text('Status Printer: Connected')
                     : const Text('Status Printer: Disconnected'),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => isSupportPrinter(),
+                    child: const Text("isSupportPrinter"),
+                  ),
+                ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

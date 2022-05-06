@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 
 import com.pax.dal.entity.EFontTypeAscii;
 import com.pax.dal.entity.EFontTypeExtCode;
+import com.pax.dal.IDeviceInfo;
+import com.pax.dal.IDeviceInfo.ESupported;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -26,6 +28,7 @@ public class FlutterPaxPrinterUtilityPlugin implements FlutterPlugin, MethodCall
   private MethodChannel channel;
   private static PrinterUtility printerUtility;
   private static QRCodeUtil qrcodeUtility;
+  private IDeviceInfo deviceInfo;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -34,13 +37,16 @@ public class FlutterPaxPrinterUtilityPlugin implements FlutterPlugin, MethodCall
     printerUtility =
             new PrinterUtility(flutterPluginBinding.getApplicationContext());
             qrcodeUtility = new QRCodeUtil();
+    deviceInfo=printerUtility.getDal().getDeviceInfo();
   }
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     if (call.method.equals("getPlatformVersion")) {
       result.success("Android " + android.os.Build.VERSION.RELEASE);
-    } else if (call.method.equals("bindPrinter")) { // instant bind
+    } else if (call.method.equals("isSupportPrinter")) {
+      result.success(deviceInfo.getUsageCount(IDeviceInfo.MODULE_ICC));
+    }else if (call.method.equals("bindPrinter")) { // instant bind
       printerUtility.getDal();
       printerUtility.init();
       result.success(true);
