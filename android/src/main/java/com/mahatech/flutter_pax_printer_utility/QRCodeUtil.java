@@ -13,11 +13,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class QRCodeUtil {
     private static QRCodeUtil qrCodeUtil;
 
-    public QRCodeUtil() {}
+    public QRCodeUtil() {
+    }
 
     public static Bitmap encodeAsBitmap(String source, int width, int height) {
         BitMatrix result;
@@ -45,6 +56,7 @@ public class QRCodeUtil {
 
         return bitmap;
     }
+
     public static Bitmap encodeAsBitmapForBar(String source, int width, int height) {
         BitMatrix result;
 
@@ -71,19 +83,57 @@ public class QRCodeUtil {
 
         return bitmap;
     }
+
     public static Bitmap getBitmapFromURL(String src) {
         try {
-           URL url = new URL(src);
-           HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-           connection.setDoInput(true);
-           connection.connect();
-           InputStream input = connection.getInputStream();
-           Bitmap myBitmap = BitmapFactory.decodeStream(input);
-           return myBitmap;
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            boolean useHttps = src.startsWith("https");
+            if (useHttps) {
+                HttpsURLConnection https = (HttpsURLConnection) connection;
+                trustAllHosts(https);
+                https.setHostnameVerifier(DO_NOT_VERIFY);
+            }
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            return BitmapFactory.decodeStream(input);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return new java.security.cert.X509Certificate[]{};
+        }
+
+        public void checkClientTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+        }
+
+        public void checkServerTrusted(X509Certificate[] chain, String authType)
+                throws CertificateException {
+        }
+    }};
+    private static final HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
+
+    private static SSLSocketFactory trustAllHosts(HttpsURLConnection connection) {
+        SSLSocketFactory oldFactory = connection.getSSLSocketFactory();
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            SSLSocketFactory newFactory = sc.getSocketFactory();
+            connection.setSSLSocketFactory(newFactory);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return oldFactory;
     }
 
 }
